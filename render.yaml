@@ -24,9 +24,9 @@ services:
       - key: AZURE_OPENAI_API_VERSION
         value: "2024-08-01-preview"
 
-  # 2. React Frontend Static Site (Served statically for FREE)
-  - type: web
-    name: interview-copilot-frontend
+# 2. React Frontend Static Site (Served statically for FREE)
+staticSites:
+  - name: interview-copilot-frontend
     env: static
     plan: free
     buildCommand: cd frontend && npm install && npm run build
