@@ -1,5 +1,5 @@
 services:
-  # 1. Django Backend Web Service
+  # 1. Django Backend Web Service (Docker-based)
   - type: web
     name: interview-copilot-backend
     env: docker
@@ -16,27 +16,22 @@ services:
       - key: ALLOWED_HOSTS
         value: "*"
       - key: AZURE_OPENAI_API_KEY
-        sync: false # User will fill this in Render Dashboard
+        sync: false # User will input their key in the Render dashboard
       - key: AZURE_OPENAI_ENDPOINT
-        sync: false # User will fill this in Render Dashboard
+        sync: false # User will input their endpoint in the Render dashboard
       - key: AZURE_OPENAI_DEPLOYMENT_NAME
-        sync: false # User will fill this in Render Dashboard
+        sync: false # User will input their deployment name in the Render dashboard
       - key: AZURE_OPENAI_API_VERSION
         value: "2024-08-01-preview"
-    disk:
-      name: copilot-media
-      mountPath: /app/media
-      sizeGB: 1
 
-  # 2. React Frontend Web Service (Served via Nginx)
-  - type: web
+  # 2. React Frontend Static Site (Builds Vite assets and serves statically for FREE)
+  - type: static
     name: interview-copilot-frontend
-    env: docker
-    dockerContext: frontend
-    dockerfilePath: Dockerfile
-    plan: free
+    env: node
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/dist
     routes:
-      # Proxy all API requests to the backend container
-      - type: redirect
+      # Rewrites frontend /api/* requests to point directly to your backend Web Service URL
+      - type: rewrite
         source: /api/*
-        destination: http://interview-copilot-backend:8000/api/*
+        destination: https://interview-copilot-backend.onrender.com/api/*
