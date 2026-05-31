@@ -30,7 +30,7 @@ services:
     env: static
     plan: free
     buildCommand: cd frontend && npm install && npm run build
-    publishPath: frontend/dist
+    publishDir: frontend/dist
     routes:
       # Rewrites frontend /api/* requests to point directly to your backend Web Service URL
       - type: rewrite
