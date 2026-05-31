@@ -24,10 +24,11 @@ services:
       - key: AZURE_OPENAI_API_VERSION
         value: "2024-08-01-preview"
 
-  # 2. React Frontend Static Site (Builds Vite assets and serves statically for FREE)
-  - type: static
+  # 2. React Frontend Static Site (Served statically for FREE)
+  - type: web
     name: interview-copilot-frontend
-    env: node
+    env: static
+    plan: free
     buildCommand: cd frontend && npm install && npm run build
     publishPath: frontend/dist
     routes:
