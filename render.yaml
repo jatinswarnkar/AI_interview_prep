@@ -1,0 +1,42 @@
+services:
+  # 1. Django Backend Web Service
+  - type: web
+    name: interview-copilot-backend
+    env: docker
+    dockerContext: backend
+    dockerfilePath: Dockerfile
+    plan: free
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: AZURE_OPENAI_API_KEY
+        sync: false # User will fill this in Render Dashboard
+      - key: AZURE_OPENAI_ENDPOINT
+        sync: false # User will fill this in Render Dashboard
+      - key: AZURE_OPENAI_DEPLOYMENT_NAME
+        sync: false # User will fill this in Render Dashboard
+      - key: AZURE_OPENAI_API_VERSION
+        value: "2024-08-01-preview"
+    disk:
+      name: copilot-media
+      mountPath: /app/media
+      sizeGB: 1
+
+  # 2. React Frontend Web Service (Served via Nginx)
+  - type: web
+    name: interview-copilot-frontend
+    env: docker
+    dockerContext: frontend
+    dockerfilePath: Dockerfile
+    plan: free
+    routes:
+      # Proxy all API requests to the backend container
+      - type: redirect
+        source: /api/*
+        destination: http://interview-copilot-backend:8000/api/*
