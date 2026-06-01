@@ -1,10 +1,10 @@
 services:
   # 1. Django Backend Web Service (Docker-based)
   - type: web
+    runtime: docker
     name: interview-copilot-backend
-    env: docker
     dockerContext: backend
-    dockerfilePath: Dockerfile
+    dockerfilePath: backend/Dockerfile
     plan: free
     envVars:
       - key: DJANGO_SETTINGS_MODULE
@@ -14,25 +14,26 @@ services:
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: "*"
+        value: ".onrender.com"
       - key: AZURE_OPENAI_API_KEY
-        sync: false # User will input their key in the Render dashboard
+        sync: false
       - key: AZURE_OPENAI_ENDPOINT
-        sync: false # User will input their endpoint in the Render dashboard
+        sync: false
       - key: AZURE_OPENAI_DEPLOYMENT_NAME
-        sync: false # User will input their deployment name in the Render dashboard
+        sync: false
       - key: AZURE_OPENAI_API_VERSION
         value: "2024-08-01-preview"
 
-  # 2. React Frontend Static Site (Served statically for FREE)
+  # 2. React Frontend Static Site
   - type: web
-    name: interview-copilot-frontend
     runtime: static
-    plan: free
+    name: interview-copilot-frontend
     buildCommand: cd frontend && npm install && npm run build
-    publishDir: frontend/dist
+    staticPublishPath: frontend/dist
     routes:
-      # Rewrites frontend /api/* requests to point directly to your backend Web Service URL
       - type: rewrite
         source: /api/*
         destination: https://interview-copilot-backend.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
