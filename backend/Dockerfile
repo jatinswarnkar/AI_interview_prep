@@ -19,8 +19,19 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . /app/
 
+# Optimize PyTorch memory footprint for 512MB free tier
+ENV OMP_NUM_THREADS=1
+ENV MKL_NUM_THREADS=1
+ENV OPENBLAS_NUM_THREADS=1
+ENV PYTORCH_PRETRAINED_BERT_CACHE=/app/.cache
+ENV TRANSFORMERS_CACHE=/app/.cache
+ENV HF_HOME=/app/.cache
+
 # Run migrations and collect static files for production
 RUN python manage.py collectstatic --noinput || true
+
+# Pre-download the SentenceTransformer model so it doesn't happen at runtime
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
 EXPOSE 8000
 
