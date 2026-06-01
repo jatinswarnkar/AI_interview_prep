@@ -26,8 +26,5 @@ EXPOSE 8000
 
 # 1 worker (free tier = 512MB), long timeout for AI pipeline,
 # preload app to share memory, bind immediately so Render detects the port
-CMD ["gunicorn", "config.wsgi:application", \
-     "--bind", "0.0.0.0:8000", \
-     "--workers", "1", \
-     "--timeout", "300", \
-     "--preload"]
+# Run migrations before starting gunicorn to ensure the SQLite DB is initialized
+CMD ["sh", "-c", "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 1 --timeout 300 --preload"]
