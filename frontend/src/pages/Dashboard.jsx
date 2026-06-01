@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Typography, Button, Card, CardContent, Grid,
-  Chip, IconButton, alpha, CircularProgress, Stack,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
+  Box, Typography, Button, Card, CardContent,
+  Chip, IconButton, CircularProgress, Stack,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, alpha
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -13,8 +13,10 @@ import {
   Error as ErrorIcon,
   Pending as ProgressIcon
 } from '@mui/icons-material';
-import { createSession, getSession, deleteSession } from '../api/client';
+import { createSession, deleteSession } from '../api/client';
 import axios from 'axios';
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -25,7 +27,7 @@ export default function Dashboard() {
   const fetchSessions = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/sessions/');
+      const res = await axios.get(`${API_BASE}/sessions/`);
       setSessions(res.data);
       setError(null);
     } catch (err) {
@@ -70,7 +72,7 @@ export default function Dashboard() {
         return <Chip icon={<ErrorIcon />} label="Failed" color="error" size="small" variant="filled" />;
       case 'ANALYZING':
       case 'UPLOADING':
-        return <Chip icon={<ProgressIcon />} label={status} color="primary" size="small" variant="filled" className="animate-pulse" />;
+        return <Chip icon={<ProgressIcon />} label={status} color="primary" size="small" variant="filled" />;
       default:
         return <Chip label={status} color="default" size="small" variant="outlined" />;
     }
@@ -89,23 +91,22 @@ export default function Dashboard() {
       {/* Hero Section */}
       <Box 
         sx={{ 
-          p: { xs: 3, md: 5 }, 
+          p: { xs: 4, md: 6 }, 
           mb: 4, 
-          borderRadius: 3, 
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.08) 100%)',
-          border: '1px solid rgba(99, 102, 241, 0.2)',
+          borderRadius: 4, 
+          background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.06) 0%, rgba(251, 146, 60, 0.04) 100%)',
+          border: '1px solid rgba(249, 115, 22, 0.12)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           textAlign: 'center'
         }}
       >
-        <Typography variant="h2" sx={{ mb: 2, fontSize: { xs: '2rem', md: '3rem' }, fontWeight: 800 }}>
-          Master Your Next <Box component="span" sx={{ color: 'primary.light' }}>Tech Interview</Box>
+        <Typography variant="h2" sx={{ mb: 2, fontSize: { xs: '2rem', md: '2.8rem' }, fontWeight: 800 }}>
+          Ace Your Next <Box component="span" sx={{ color: 'primary.main' }}>Interview</Box>
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: '700px', mb: 4, fontSize: { xs: '1rem', md: '1.1rem' } }}>
-          Upload your resume and paste a target job description. Our multi-agent AI pipeline built on 
-          <strong> LangGraph</strong> and <strong>RAG</strong> will analyze skills gaps, generate grounded interview questions, and build a customized timeline-based study plan.
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: '620px', mb: 4, fontSize: { xs: '1rem', md: '1.1rem' } }}>
+          Upload your resume and paste a job description. Our AI will analyze skill gaps, generate targeted practice questions, and create a personalized study plan.
         </Typography>
         
         <Button 
@@ -113,15 +114,15 @@ export default function Dashboard() {
           size="large" 
           startIcon={<AddIcon />} 
           onClick={handleStartSession}
-          sx={{ px: 4, py: 1.5, fontSize: '1rem' }}
+          sx={{ px: 5, py: 1.5, fontSize: '1rem' }}
         >
-          Create New Prep Session
+          Start New Prep Session
         </Button>
       </Box>
 
       {/* Sessions History */}
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, fontFamily: 'Outfit' }}>
-        Prep Sessions History
+        Your Sessions
       </Typography>
 
       {loading ? (
@@ -129,7 +130,7 @@ export default function Dashboard() {
           <CircularProgress color="primary" />
         </Box>
       ) : error ? (
-        <Card sx={{ bgcolor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+        <Card sx={{ bgcolor: alpha('#EF4444', 0.04), border: '1px solid', borderColor: alpha('#EF4444', 0.15) }}>
           <CardContent sx={{ textAlign: 'center', py: 4 }}>
             <Typography color="error" variant="body1" sx={{ fontWeight: 600 }}>{error}</Typography>
             <Button onClick={fetchSessions} variant="outlined" color="error" sx={{ mt: 2 }}>Retry Connection</Button>
@@ -139,10 +140,10 @@ export default function Dashboard() {
         <Card className="glass-card">
           <CardContent sx={{ textAlign: 'center', py: 8 }}>
             <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-              No prep sessions found.
+              No prep sessions yet.
             </Typography>
             <Typography variant="body2" color="text.disabled" sx={{ mb: 3, maxWidth: '400px', mx: 'auto' }}>
-              Create your first preparation session by uploading a resume and specifying your target role.
+              Create your first session to start preparing for your next interview.
             </Typography>
             <Button variant="outlined" startIcon={<AddIcon />} onClick={handleStartSession}>
               Start First Session
@@ -150,12 +151,12 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       ) : (
-        <TableContainer component={Paper} className="glass-card" sx={{ background: 'none' }}>
+        <TableContainer component={Paper} className="glass-card">
           <Table>
             <TableHead>
-              <TableRow sx={{ borderBottom: '2px solid rgba(255, 255, 255, 0.08)' }}>
-                <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary' }}>Prep Session</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary' }}>Created Date</Typography></TableCell>
+              <TableRow>
+                <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary' }}>Session</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary' }}>Created</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary' }}>Status</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary' }}>Actions</Typography></TableCell>
               </TableRow>
@@ -167,14 +168,13 @@ export default function Dashboard() {
                   onClick={() => handleResumeSession(session)}
                   sx={{ 
                     cursor: 'pointer',
-                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' },
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+                    '&:hover': { bgcolor: 'rgba(249, 115, 22, 0.03)' },
                   }}
                 >
-                  <TableCell sx={{ fontWeight: 600, color: 'primary.light' }}>
+                  <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
                     Session #{session.session_number}
                   </TableCell>
-                  <TableCell color="text.secondary">
+                  <TableCell sx={{ color: 'text.secondary' }}>
                     {new Date(session.created_at).toLocaleDateString(undefined, {
                       year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                     })}
@@ -187,7 +187,7 @@ export default function Dashboard() {
                       <Button
                         size="small"
                         variant="outlined"
-                        color={session.status === 'COMPLETED' ? 'secondary' : 'primary'}
+                        color={session.status === 'COMPLETED' ? 'primary' : 'secondary'}
                         startIcon={<ResumeIcon />}
                         onClick={() => handleResumeSession(session)}
                       >
@@ -197,7 +197,7 @@ export default function Dashboard() {
                         size="small" 
                         color="error" 
                         onClick={(e) => handleDeleteSession(session.id, e)}
-                        sx={{ border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 1 }}
+                        sx={{ border: '1px solid', borderColor: alpha('#EF4444', 0.2), borderRadius: 1.5 }}
                       >
                         <DeleteIcon fontSize="small" />
                       </IconButton>

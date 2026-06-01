@@ -23,14 +23,12 @@ export default function ResumeUpload() {
   const [resumeData, setResumeData] = useState(null);
   const [fileName, setFileName] = useState('');
 
-  // Check if session already has resume uploaded
   useEffect(() => {
     const checkExistingResume = async () => {
       try {
         const res = await getSession(sessionId);
         if (res.data.resume) {
           setResumeData(res.data.resume);
-          // Extract file name from path
           const path = res.data.resume.file_path || '';
           const parts = path.split('_');
           setFileName(parts.length > 1 ? parts.slice(1).join('_') : 'Resume Uploaded');
@@ -57,7 +55,7 @@ export default function ResumeUpload() {
       setResumeData(res.data);
     } catch (err) {
       console.error("Resume upload failed", err);
-      const errMsg = err.response?.data?.error || "Failed to upload and parse resume file. Ensure the backend is active.";
+      const errMsg = err.response?.data?.error || "Failed to upload and parse resume file.";
       setError(errMsg);
     } finally {
       setLoading(false);
@@ -84,7 +82,7 @@ export default function ResumeUpload() {
         Upload Your Resume
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Step 1 of 5: Upload your resume in PDF or DOCX format. The agent will parse and structure your skills, projects, and experiences.
+        Step 1 of 5: Upload your resume in PDF or DOCX format. We'll extract your skills, projects, and experience.
       </Typography>
 
       {error && (
@@ -100,36 +98,36 @@ export default function ResumeUpload() {
               {...getRootProps()}
               sx={{
                 border: '2px dashed',
-                borderColor: isDragActive ? 'primary.main' : 'rgba(255, 255, 255, 0.12)',
-                borderRadius: 2,
+                borderColor: isDragActive ? 'primary.main' : '#E2E8F0',
+                borderRadius: 3,
                 p: 6,
                 textAlign: 'center',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease-in-out',
-                bgcolor: isDragActive ? alpha('#6366f1', 0.05) : 'transparent',
+                bgcolor: isDragActive ? alpha('#F97316', 0.04) : 'transparent',
                 '&:hover': {
                   borderColor: 'primary.main',
-                  bgcolor: 'rgba(99, 102, 241, 0.02)',
+                  bgcolor: alpha('#F97316', 0.02),
                 }
               }}
             >
               <input { ...getInputProps() } />
-              <UploadIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-              <Typography variant="h6" sx={{ mb: 1 }}>
+              <UploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2, opacity: 0.7 }} />
+              <Typography variant="h6" sx={{ mb: 1, color: 'text.primary' }}>
                 {isDragActive ? 'Drop your resume here' : 'Drag & drop your resume file'}
               </Typography>
-              <Typography variant="body2" color="text.disabled">
+              <Typography variant="body2" color="text.secondary">
                 Supports PDF and DOCX (Max 5MB)
               </Typography>
             </Box>
           ) : loading ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6 }}>
-              <CircularProgress size={40} sx={{ mb: 2 }} />
+              <CircularProgress size={40} sx={{ mb: 2 }} color="primary" />
               <Typography variant="h6" sx={{ mb: 1 }}>
                 Uploading & Parsing Resume...
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                SentenceTransformers and PyPDF are extracting text and skills.
+                Extracting text and identifying key skills.
               </Typography>
             </Box>
           ) : (
@@ -162,7 +160,7 @@ export default function ResumeUpload() {
       </Card>
 
       {resumeData && (
-        <Accordion className="glass-card" sx={{ background: 'rgba(17, 24, 39, 0.4) !important' }}>
+        <Accordion className="glass-card">
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               View Extracted Text Preview
@@ -174,13 +172,14 @@ export default function ResumeUpload() {
                 maxHeight: '300px', 
                 overflowY: 'auto', 
                 p: 2, 
-                bgcolor: 'rgba(0, 0, 0, 0.2)', 
-                borderRadius: 1, 
-                border: '1px solid rgba(255, 255, 255, 0.05)',
+                bgcolor: '#F8FAFC', 
+                borderRadius: 1.5, 
+                border: '1px solid #E2E8F0',
                 fontFamily: 'monospace',
                 fontSize: '0.8rem',
                 whiteSpace: 'pre-wrap',
-                textAlign: 'left'
+                textAlign: 'left',
+                color: 'text.primary'
               }}
             >
               {resumeData.raw_text}

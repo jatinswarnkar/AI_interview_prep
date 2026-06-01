@@ -13,12 +13,11 @@ import {
 import { submitJobDescription, runAnalysis, getSession } from '../api/client';
 
 const pipelineSteps = [
-  "Resume Analyzer Agent",
-  "JD Analyzer Agent",
-  "Gap Analysis Agent",
-  "FAISS Vector Retrieval (RAG)",
-  "Question Generator Agent",
-  "Roadmap Generator Agent"
+  { label: "Analyzing Your Resume", subtitle: "Extracting skills, experience & projects..." },
+  { label: "Understanding the Role", subtitle: "Parsing job requirements & responsibilities..." },
+  { label: "Finding Your Gaps", subtitle: "Comparing your profile against the role..." },
+  { label: "Generating Interview Questions", subtitle: "Creating personalized practice questions..." },
+  { label: "Building Your Study Plan", subtitle: "Crafting a tailored learning roadmap..." }
 ];
 
 export default function JobDescription() {
@@ -48,13 +47,13 @@ export default function JobDescription() {
     }
   }, [sessionId]);
 
-  // Handle pipeline step mock animations (increment every 6.5s)
+  // Handle pipeline step animations (increment every 8s)
   useEffect(() => {
     let interval;
     if (analyzing) {
       interval = setInterval(() => {
         setCurrentStep((prev) => (prev < pipelineSteps.length - 1 ? prev + 1 : prev));
-      }, 6500);
+      }, 8000);
     }
     return () => clearInterval(interval);
   }, [analyzing]);
@@ -96,7 +95,7 @@ export default function JobDescription() {
         Job Description & Analysis
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Step 2 of 5: Paste the target job description. We will execute 5 specialized AI agents to map your resume against the role requirements.
+        Step 2 of 5: Paste the target job description. Our AI will analyze your fit and generate a personalized interview prep plan.
       </Typography>
 
       {error && (
@@ -111,19 +110,19 @@ export default function JobDescription() {
             <CircularProgress size={60} thickness={4} sx={{ mb: 4 }} color="secondary" />
             
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, fontFamily: 'Outfit' }}>
-              Running Multi-Agent Orchestration
+              Preparing Your Interview Kit
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 5, maxWidth: '550px', mx: 'auto' }}>
-              The system is executing our LangGraph workflow. Each node runs a dedicated agent utilizing Azure OpenAI with structured output.
+              Our AI is analyzing your resume against the job description to create a personalized preparation plan. This typically takes 30–60 seconds.
             </Typography>
 
             <Box sx={{ maxWidth: '600px', mx: 'auto', mt: 2 }}>
               <Stepper activeStep={currentStep} orientation="vertical" sx={{ textAlign: 'left' }}>
-                {pipelineSteps.map((label, index) => {
+                {pipelineSteps.map((step, index) => {
                   const isCurrent = index === currentStep;
                   const isCompleted = index < currentStep;
                   return (
-                    <Step key={label}>
+                    <Step key={step.label}>
                       <StepLabel
                         StepIconProps={{
                           sx: {
@@ -138,16 +137,16 @@ export default function JobDescription() {
                             color: isCurrent ? 'text.primary' : isCompleted ? 'text.secondary' : 'text.disabled'
                           }}
                         >
-                          {label}
+                          {step.label}
                         </Typography>
                         {isCurrent && (
                           <Typography variant="caption" color="secondary" sx={{ display: 'block', mt: 0.5 }}>
-                            Processing payload through LLM...
+                            {step.subtitle}
                           </Typography>
                         )}
                         {isCompleted && (
                           <Typography variant="caption" color="success.main" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                            <CompleteIcon sx={{ fontSize: 12 }} /> Result saved to DB
+                            <CompleteIcon sx={{ fontSize: 12 }} /> Done
                           </Typography>
                         )}
                       </StepLabel>

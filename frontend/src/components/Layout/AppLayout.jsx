@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Drawer, AppBar, Toolbar, Typography, List, ListItem,
   ListItemButton, ListItemIcon, ListItemText, IconButton,
@@ -28,7 +28,6 @@ export default function AppLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Extract session ID from path if present (e.g. /session/:sessionId/...)
   const pathParts = location.pathname.split('/');
   const sessionIndex = pathParts.indexOf('session');
   const sessionId = sessionIndex !== -1 && pathParts[sessionIndex + 1] ? pathParts[sessionIndex + 1] : null;
@@ -76,10 +75,10 @@ export default function AppLayout({ children }) {
 
   const drawer = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.light', display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box component="span" sx={{ fontSize: '1.4rem' }}>🎯</Box>
-          Copilot Prep
+      <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 2.5 }}>
+        <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box component="span" sx={{ fontSize: '1.5rem' }}>🎯</Box>
+          Interview Copilot
         </Typography>
       </Toolbar>
       
@@ -91,7 +90,7 @@ export default function AppLayout({ children }) {
           variant="contained"
           startIcon={<NewSessionIcon />}
           onClick={handleCreateNewSession}
-          sx={{ py: 1 }}
+          sx={{ py: 1.2 }}
         >
           New Prep Session
         </Button>
@@ -99,7 +98,7 @@ export default function AppLayout({ children }) {
 
       <Divider />
       
-      <List sx={{ px: 1, flexGrow: 1 }}>
+      <List sx={{ px: 1, flexGrow: 1, pt: 1 }}>
         {menuItems.map((item) => {
           const isDisabled = item.requiresSession && !sessionId;
           const isActive = location.pathname === item.path;
@@ -115,18 +114,18 @@ export default function AppLayout({ children }) {
                   }
                 }}
                 sx={{
-                  borderRadius: 1.5,
-                  backgroundColor: isActive ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
-                  color: isActive ? 'primary.light' : isDisabled ? 'text.disabled' : 'text.secondary',
+                  borderRadius: 2,
+                  backgroundColor: isActive ? 'rgba(249, 115, 22, 0.08)' : 'transparent',
+                  color: isActive ? 'primary.dark' : isDisabled ? 'text.disabled' : 'text.secondary',
                   borderLeft: isActive ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
                   '&:hover': {
-                    backgroundColor: isActive ? 'rgba(99, 102, 241, 0.18)' : 'rgba(255, 255, 255, 0.03)',
-                    color: isActive ? 'primary.light' : 'text.primary',
+                    backgroundColor: isActive ? 'rgba(249, 115, 22, 0.12)' : 'rgba(0, 0, 0, 0.03)',
+                    color: isActive ? 'primary.dark' : 'text.primary',
                   },
                 }}
               >
                 <ListItemIcon sx={{ 
-                  color: isActive ? 'primary.light' : isDisabled ? 'text.disabled' : 'text.secondary',
+                  color: isActive ? 'primary.main' : isDisabled ? 'text.disabled' : 'text.secondary',
                   minWidth: 40 
                 }}>
                   {item.icon}
@@ -142,10 +141,10 @@ export default function AppLayout({ children }) {
       </List>
       
       {sessionId && (
-        <Box sx={{ p: 2, borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
-          <Typography variant="caption" color="text.disabled" sx={{ display: 'block', wordBreak: 'break-all', textAlign: 'center', fontWeight: 600 }}>
-            Active Prep Session:<br />
-            <Typography component="span" variant="body2" sx={{ fontWeight: 700, color: 'secondary.light', mt: 0.5, display: 'inline-block' }}>
+        <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', fontWeight: 600 }}>
+            Active Session:
+            <Typography component="span" variant="body2" sx={{ fontWeight: 700, color: 'primary.main', ml: 0.5 }}>
               #{sessionNum || '...'}
             </Typography>
           </Typography>
@@ -168,14 +167,13 @@ export default function AppLayout({ children }) {
           </IconButton>
           
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 700, fontFamily: 'Outfit, sans-serif' }}>
-            {location.pathname === '/' ? 'Dashboard Overview' : (sessionNum ? `Prep Session #${sessionNum}` : 'AI Interview Copilot')}
+            {location.pathname === '/' ? 'Dashboard' : (sessionNum ? `Prep Session #${sessionNum}` : 'Interview Copilot')}
           </Typography>
 
-          
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: sessionId ? 'success.main' : 'warning.main' }} />
             <Typography variant="body2" color="text.secondary">
-              {sessionId ? 'Session Active' : 'Select or Create Session'}
+              {sessionId ? 'Active' : 'No Session'}
             </Typography>
           </Box>
         </Toolbar>
@@ -185,7 +183,6 @@ export default function AppLayout({ children }) {
         component="nav"
         sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
       >
-        {/* Mobile drawer */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -199,7 +196,6 @@ export default function AppLayout({ children }) {
           {drawer}
         </Drawer>
         
-        {/* Desktop drawer */}
         <Drawer
           variant="permanent"
           sx={{
@@ -218,7 +214,7 @@ export default function AppLayout({ children }) {
           flexGrow: 1,
           p: { xs: 2, md: 4 },
           width: { md: `calc(100% - ${drawerWidth}px)` },
-          mt: 8, // space for AppBar
+          mt: 8,
           minHeight: 'calc(100vh - 64px)',
           display: 'flex',
           flexDirection: 'column'

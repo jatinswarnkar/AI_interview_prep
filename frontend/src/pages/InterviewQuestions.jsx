@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Tabs, Tab, Chip,
   CircularProgress, Alert, Accordion, AccordionSummary,
-  AccordionDetails, Stack, Badge, Divider, Button, useTheme
+  AccordionDetails, Stack, Divider, Button, useTheme, alpha
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -34,7 +34,7 @@ export default function InterviewQuestions() {
         setError(null);
       } catch (err) {
         console.error("Failed to load questions", err);
-        setError("Could not retrieve interview questions. Verify backend server is active.");
+        setError("Could not retrieve interview questions.");
       } finally {
         setLoading(false);
       }
@@ -70,7 +70,7 @@ export default function InterviewQuestions() {
           No interview questions found.
         </Typography>
         <Button variant="contained" onClick={() => navigate(`/session/${sessionId}/jd`)}>
-          Trigger Analysis
+          Run Analysis
         </Button>
       </Card>
     );
@@ -90,10 +90,10 @@ export default function InterviewQuestions() {
   return (
     <Box sx={{ py: 2 }}>
       <Typography variant="h3" sx={{ mb: 1, fontWeight: 700, fontFamily: 'Outfit' }}>
-        Practice Interview Questions
+        Practice Questions
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Step 4 of 5: Review targeted interview questions based on your background and target job description gaps.
+        Step 4 of 5: Review targeted interview questions based on your skill gaps. Click a question to reveal the expected answer.
       </Typography>
 
       {/* Tabs Menu */}
@@ -103,8 +103,6 @@ export default function InterviewQuestions() {
           onChange={(e, newTab) => setActiveTab(newTab)}
           variant="scrollable"
           scrollButtons="auto"
-          textColor="primary"
-          indicatorColor="primary"
           sx={{
             '& .MuiTab-root': {
               fontWeight: 600,
@@ -113,7 +111,7 @@ export default function InterviewQuestions() {
             }
           }}
         >
-          {tabsConfig.map((tab, idx) => {
+          {tabsConfig.map((tab) => {
             const count = (questionData[tab.key] || []).length;
             return (
               <Tab
@@ -126,7 +124,7 @@ export default function InterviewQuestions() {
                       size="small"
                       color={tab.color}
                       variant="filled"
-                      sx={{ fontSize: '0.75rem', height: 18 }}
+                      sx={{ fontSize: '0.75rem', height: 20 }}
                     />
                   </Box>
                 }
@@ -149,9 +147,7 @@ export default function InterviewQuestions() {
               className="glass-card"
               sx={{
                 mb: 2,
-                background: 'rgba(17, 24, 39, 0.45) !important',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                '&::before': { display: 'none' }, // removes accordion default top separator
+                '&::before': { display: 'none' },
                 overflow: 'hidden'
               }}
             >
@@ -160,7 +156,7 @@ export default function InterviewQuestions() {
                 sx={{
                   py: 1,
                   px: 3,
-                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.01)' }
+                  '&:hover': { bgcolor: alpha('#F97316', 0.02) }
                 }}
               >
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ width: '100%' }}>
@@ -169,11 +165,11 @@ export default function InterviewQuestions() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: 28,
-                      height: 28,
+                      width: 30,
+                      height: 30,
                       borderRadius: '50%',
-                      bgcolor: 'rgba(99, 102, 241, 0.15)',
-                      color: 'primary.light',
+                      bgcolor: alpha('#F97316', 0.08),
+                      color: 'primary.main',
                       flexShrink: 0
                     }}
                   >
@@ -185,24 +181,24 @@ export default function InterviewQuestions() {
                 </Stack>
               </AccordionSummary>
               
-              <AccordionDetails sx={{ px: 3, pb: 3, borderTop: '1px solid rgba(255, 255, 255, 0.05)', bgcolor: 'rgba(0, 0, 0, 0.1)' }}>
+              <AccordionDetails sx={{ px: 3, pb: 3, borderTop: '1px solid', borderColor: 'divider', bgcolor: '#FAFAF9' }}>
                 <Box sx={{ mt: 2 }}>
                   {/* Expected Answer Section */}
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, color: 'secondary.light', mb: 1 }}>
-                    <AnswerIcon fontSize="small" /> Expected Answer Structure
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, color: 'success.main', mb: 1 }}>
+                    <AnswerIcon fontSize="small" /> Expected Answer
                   </Typography>
-                  <Typography variant="body2" color="text.primary" sx={{ whiteSpace: 'pre-wrap', pl: 3, mb: 3 }}>
+                  <Typography variant="body2" color="text.primary" sx={{ whiteSpace: 'pre-wrap', pl: 3, mb: 3, lineHeight: 1.7 }}>
                     {q.expected_answer}
                   </Typography>
                   
-                  <Divider sx={{ my: 2, borderColor: 'rgba(255,255,255,0.05)' }} />
+                  <Divider sx={{ my: 2 }} />
 
                   {/* Pro Tip Section */}
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, color: 'warning.light', mb: 1 }}>
-                    <TipIcon fontSize="small" /> Interviewer Pro Tip
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, color: '#F59E0B', mb: 1 }}>
+                    <TipIcon fontSize="small" /> Pro Tip
                   </Typography>
                   <Box sx={{ pl: 3 }}>
-                    <Card sx={{ bgcolor: alpha(theme.palette.warning.main, 0.05), border: `1px solid ${alpha(theme.palette.warning.main, 0.15)}`, p: 2 }}>
+                    <Card sx={{ bgcolor: alpha('#F59E0B', 0.04), border: '1px solid', borderColor: alpha('#F59E0B', 0.15), p: 2 }}>
                       <Typography variant="body2" color="text.secondary">
                         {q.pro_tip}
                       </Typography>
@@ -230,7 +226,7 @@ export default function InterviewQuestions() {
           onClick={() => navigate(`/session/${sessionId}/roadmap`)}
           sx={{ px: 4 }}
         >
-          View Learning Roadmap
+          View Study Roadmap
         </Button>
       </Stack>
     </Box>
