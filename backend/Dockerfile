@@ -19,10 +19,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . /app/
 
-# Collect static files for production
+# Run migrations and collect static files for production
 RUN python manage.py collectstatic --noinput || true
 
 EXPOSE 8000
 
-# Use gunicorn for production
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120"]
+# 1 worker (free tier = 512MB), long timeout for AI pipeline,
+# preload app to share memory, bind immediately so Render detects the port
+CMD ["gunicorn", "config.wsgi:application", \
+     "--bind", "0.0.0.0:8000", \
+     "--workers", "1", \
+     "--timeout", "300", \
+     "--preload"]

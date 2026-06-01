@@ -1,20 +1,25 @@
 import logging
-from langgraph.graph import START, END, StateGraph
-
-from agents.state import InterviewState
-from agents.nodes.resume_analyzer import resume_analyzer_node
-from agents.nodes.jd_analyzer import jd_analyzer_node
-from agents.nodes.gap_analyzer import gap_analyzer_node
-from agents.nodes.question_generator import question_generator_node
-from agents.nodes.roadmap_generator import roadmap_generator_node
 
 logger = logging.getLogger(__name__)
 
+# Lazy graph instance — avoids importing heavy LangGraph + agent deps at startup
+_compiled_graph = None
 
-def create_graph():
+
+def _build_graph():
     """
     Builds and compiles the multi-agent execution graph.
+    Called lazily on first use to avoid OOM on free-tier hosting.
     """
+    from langgraph.graph import START, END, StateGraph
+
+    from agents.state import InterviewState
+    from agents.nodes.resume_analyzer import resume_analyzer_node
+    from agents.nodes.jd_analyzer import jd_analyzer_node
+    from agents.nodes.gap_analyzer import gap_analyzer_node
+    from agents.nodes.question_generator import question_generator_node
+    from agents.nodes.roadmap_generator import roadmap_generator_node
+
     # Initialize the graph with our state schema
     workflow = StateGraph(InterviewState)
 
@@ -49,5 +54,9 @@ def create_graph():
     return app
 
 
-# Export the compiled graph
-graph = create_graph()
+def get_graph():
+    """Return the compiled graph, building it on first call."""
+    global _compiled_graph
+    if _compiled_graph is None:
+        _compiled_graph = _build_graph()
+    return _compiled_graph

@@ -20,7 +20,7 @@ from .serializers import (
     JobDescriptionDataSerializer
 )
 from services.resume_parser import ResumeParser
-from agents.graph import graph
+from agents.graph import get_graph
 
 logger = logging.getLogger(__name__)
 
@@ -165,7 +165,7 @@ class AnalyzeView(APIView):
             
             # 2. Invoke the compiled graph
             logger.info(f"Invoking LangGraph pipeline for Session {session.id}")
-            final_state = graph.invoke(initial_state)
+            final_state = get_graph().invoke(initial_state)
             
             # Check for errors in state
             errors = final_state.get("errors", [])

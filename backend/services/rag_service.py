@@ -4,15 +4,15 @@ RAG Service — FAISS Vector Store + SentenceTransformers.
 Provides semantic search over interview preparation documents.
 Loads the FAISS index and embedding model lazily (on first call)
 and caches them in memory for subsequent requests.
+
+Heavy imports (faiss, sentence_transformers, numpy) are deferred
+to avoid OOM on free-tier hosting during Django startup.
 """
 import os
 import pickle
 import logging
 from pathlib import Path
 
-import numpy as np
-import faiss
-from sentence_transformers import SentenceTransformer
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -32,6 +32,7 @@ class RAGService:
     _index = None
     _documents = None
     _metadata = None
+    _available = None  # Track whether heavy deps are importable
 
     def __new__(cls):
         """Singleton pattern — one shared instance across the app."""
@@ -39,9 +40,28 @@ class RAGService:
             cls._instance = super().__new__(cls)
         return cls._instance
 
+    @classmethod
+    def _check_available(cls):
+        """Check if FAISS and SentenceTransformers are importable."""
+        if cls._available is not None:
+            return cls._available
+        try:
+            import faiss  # noqa: F401
+            import numpy  # noqa: F401
+            from sentence_transformers import SentenceTransformer  # noqa: F401
+            cls._available = True
+        except ImportError:
+            logger.warning("FAISS or SentenceTransformers not available. RAG disabled.")
+            cls._available = False
+        return cls._available
+
     def _ensure_loaded(self):
         """Lazy-load the embedding model and FAISS index."""
+        if not self._check_available():
+            return
+
         if self._model is None:
+            from sentence_transformers import SentenceTransformer
             logger.info(f"Loading SentenceTransformer model: {settings.EMBEDDING_MODEL_NAME}")
             self._model = SentenceTransformer(settings.EMBEDDING_MODEL_NAME)
             logger.info("SentenceTransformer model loaded.")
@@ -51,6 +71,8 @@ class RAGService:
 
     def _load_index(self):
         """Load FAISS index and document metadata from disk."""
+        import faiss
+
         index_path = Path(settings.FAISS_INDEX_DIR) / 'interview_prep.faiss'
         meta_path = Path(settings.FAISS_INDEX_DIR) / 'interview_prep_meta.pkl'
 
@@ -82,6 +104,11 @@ class RAGService:
         Returns:
             List of dicts with 'content', 'score', and 'source' keys.
         """
+        if not self._check_available():
+            logger.warning("RAG not available, returning empty results.")
+            return []
+
+        import numpy as np
         self._ensure_loaded()
 
         if self._index is None or self._index.ntotal == 0:
@@ -121,6 +148,10 @@ class RAGService:
         Args:
             documents_dir: Path to directory containing markdown files.
         """
+        import numpy as np
+        import faiss
+        from sentence_transformers import SentenceTransformer
+
         documents_dir = documents_dir or str(settings.RAG_DOCUMENTS_DIR)
         index_dir = str(settings.FAISS_INDEX_DIR)
         os.makedirs(index_dir, exist_ok=True)
