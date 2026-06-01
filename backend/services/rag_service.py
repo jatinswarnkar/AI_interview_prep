@@ -59,6 +59,15 @@ class RAGService:
         """Lazy-load the embedding model and FAISS index."""
         if not self._check_available():
             return
+            
+        # VERY IMPORTANT FIX for Render Free Tier (512MB RAM limit)
+        # We disable loading the heavy PyTorch model if RAG is disabled
+        # to prevent the OS OOM killer (SIGKILL) from terminating the worker.
+        disable_rag = os.getenv("DISABLE_RAG", "True").lower() == "true"
+        if disable_rag:
+            logger.warning("RAG is disabled via DISABLE_RAG env var to save memory. Skipping AI model load.")
+            self._available = False
+            return
 
         if self._model is None:
             from sentence_transformers import SentenceTransformer
